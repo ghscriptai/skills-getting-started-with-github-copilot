@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const activityCard = document.createElement("div");
         activityCard.className = "activity-card";
 
-        const spotsLeft = details.max_participants - details.participants.length;
+        const spotsLeft = details.max_participants - (details.participants ? details.participants.length : 0);
 
         activityCard.innerHTML = `
           <h4>${name}</h4>
@@ -26,6 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
         `;
+
+        // Create participants container and render participants
+        const participantsContainer = document.createElement("div");
+        participantsContainer.className = "participants";
+        renderParticipants(participantsContainer, details.participants || []);
+        activityCard.appendChild(participantsContainer);
 
         activitiesList.appendChild(activityCard);
 
@@ -62,6 +68,10 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        // refresh activities to reflect new participant
+        activitiesList.innerHTML = "<p>Loading activities...</p>";
+        // small delay before refetch to allow server update
+        setTimeout(fetchActivities, 300);
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -83,4 +93,105 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize app
   fetchActivities();
+
+  // Helper: render participants into container
+  function renderParticipants(container, participants) {
+    container.innerHTML = "";
+
+    const header = document.createElement("div");
+    header.className = "participants-header";
+
+    const title = document.createElement("h5");
+    title.textContent = "Deelnemers";
+    header.appendChild(title);
+
+    const count = document.createElement("span");
+    count.className = "participants-count";
+    count.textContent = String((participants && participants.length) || 0);
+    header.appendChild(count);
+
+    container.appendChild(header);
+
+    if (!participants || participants.length === 0) {
+      const info = document.createElement("div");
+      info.className = "info";
+      info.textContent = "Nog geen deelnemers";
+      container.appendChild(info);
+      return;
+    }
+
+    const ul = document.createElement("ul");
+    ul.className = "participants-list";
+
+    participants.forEach(item => {
+      const { name, status } = normalizeParticipant(item);
+
+      const li = document.createElement("li");
+
+      const avatar = document.createElement("span");
+      avatar.className = "participant-avatar";
+      avatar.textContent = initials(name);
+      li.appendChild(avatar);
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "participant-name";
+      nameSpan.textContent = name;
+      li.appendChild(nameSpan);
+
+      const meta = document.createElement("span");
+      meta.className = "participant-meta";
+      meta.textContent = status || "";
+      li.appendChild(meta);
+
+      // Delete icon/button to unregister participant
+      const del = document.createElement("button");
+      del.className = "participant-delete";
+      del.title = "Verwijder deelnemer";
+      del.type = "button";
+      del.innerHTML = "&times;";
+      del.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        // Ask backend to unregister this participant. We assume `name` holds the email or identifier.
+        try {
+          const activityName = li.closest('.activity-card').querySelector('h4').textContent;
+          const resp = await fetch(
+            `/activities/${encodeURIComponent(activityName)}/participants?email=${encodeURIComponent(name)}`,
+            { method: 'DELETE' }
+          );
+
+          const result = await resp.json();
+          if (resp.ok) {
+            // Refresh activities list to reflect change
+            activitiesList.innerHTML = "<p>Loading activities...</p>";
+            setTimeout(fetchActivities, 100);
+          } else {
+            console.error('Failed to unregister:', result.detail || result.message);
+            alert(result.detail || result.message || 'Kon deelnemer niet verwijderen');
+          }
+        } catch (err) {
+          console.error('Error unregistering participant:', err);
+          alert('Kon deelnemer niet verwijderen');
+        }
+      });
+
+      li.appendChild(del);
+
+      ul.appendChild(li);
+    });
+
+    container.appendChild(ul);
+  }
+
+  function normalizeParticipant(item) {
+    if (!item) return { name: "Onbekend", status: "" };
+    if (typeof item === "string") return { name: item, status: "" };
+    return { name: item.name || item.email || "Deelnemer", status: item.status || "" };
+  }
+
+  function initials(fullName) {
+    if (!fullName) return "";
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+  }
 });

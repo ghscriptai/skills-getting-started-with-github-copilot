@@ -143,6 +143,39 @@ document.addEventListener("DOMContentLoaded", () => {
       meta.textContent = status || "";
       li.appendChild(meta);
 
+      // Delete icon/button to unregister participant
+      const del = document.createElement("button");
+      del.className = "participant-delete";
+      del.title = "Verwijder deelnemer";
+      del.type = "button";
+      del.innerHTML = "&times;";
+      del.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        // Ask backend to unregister this participant. We assume `name` holds the email or identifier.
+        try {
+          const activityName = li.closest('.activity-card').querySelector('h4').textContent;
+          const resp = await fetch(
+            `/activities/${encodeURIComponent(activityName)}/participants?email=${encodeURIComponent(name)}`,
+            { method: 'DELETE' }
+          );
+
+          const result = await resp.json();
+          if (resp.ok) {
+            // Refresh activities list to reflect change
+            activitiesList.innerHTML = "<p>Loading activities...</p>";
+            setTimeout(fetchActivities, 100);
+          } else {
+            console.error('Failed to unregister:', result.detail || result.message);
+            alert(result.detail || result.message || 'Kon deelnemer niet verwijderen');
+          }
+        } catch (err) {
+          console.error('Error unregistering participant:', err);
+          alert('Kon deelnemer niet verwijderen');
+        }
+      });
+
+      li.appendChild(del);
+
       ul.appendChild(li);
     });
 

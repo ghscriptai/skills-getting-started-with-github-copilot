@@ -153,6 +153,23 @@ section h3 {
   margin-left: auto;
 }
 
+/* Delete button for participants */
+.activity-card .participant-delete {
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 18px;
+  line-height: 1;
+  margin-left: 8px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.activity-card .participant-delete:hover {
+  background: rgba(198,40,40,0.08);
+}
+
 /* Smalle schermen */
 @media (max-width: 480px) {
   .activity-card .participant-avatar {

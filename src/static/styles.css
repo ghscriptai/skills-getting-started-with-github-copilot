@@ -74,6 +74,98 @@ section h3 {
   margin-bottom: 8px;
 }
 
+/* Deelnemers-sectie in activity cards */
+.activity-card .participants {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #eee;
+}
+
+.activity-card .participants-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.activity-card .participants-header h5 {
+  font-size: 14px;
+  color: #1a237e;
+  margin: 0;
+  font-weight: 600;
+}
+
+.activity-card .participants-count {
+  background: #e8f0ff;
+  color: #1a237e;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.activity-card .participants-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.activity-card .participants-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #333;
+}
+
+.activity-card .participant-avatar {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#cfe3ff,#e8f5ff);
+  color: #0b3b91;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  border: 1px solid rgba(10,30,100,0.08);
+}
+
+.activity-card .participant-name {
+  font-size: 14px;
+  color: #0b3b91;
+  font-weight: 600;
+}
+
+.activity-card .participant-meta {
+  font-size: 12px;
+  color: #666;
+  margin-left: auto;
+}
+
+/* Smalle schermen */
+@media (max-width: 480px) {
+  .activity-card .participant-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .activity-card .participants-list li {
+    padding: 8px 6px;
+  }
+}
+
 .form-group {
   margin-bottom: 15px;
 }
